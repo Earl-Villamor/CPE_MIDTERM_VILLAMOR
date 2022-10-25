@@ -1,0 +1,69 @@
+- name: install Apache
+  apt:
+    name:
+      - apache2
+    state: present
+
+- name: install PHP module for Apache
+  apt: 
+    name: libapache2-mod-php5
+    state: present
+
+- name: start Apache
+  service:
+    name:
+      - apache2
+    state: running
+    enabled: yes
+
+
+- name: Install MariaDB server package
+  apt:
+    name:
+      - mariadb
+      - server
+    state: present
+
+- name: Start Mysql Service
+  service:
+    name: mysql
+    state: started
+    enabled: true
+
+- name: Install python Mysql package
+  apt:
+    name: python
+      - mysqldb
+    state: present
+
+- name: Create a new database
+  mysql_db:
+    name: demo
+    state: present
+    collation: utf8_general_ci
+
+- name: Create a database user
+  mysql_user:
+    name: villamor
+    password: earlv
+    priv: "*"
+    state: present
+
+- name: Copy sample data
+  copy:
+    src: dump.sql dest=/tmp/dump.sql
+
+- name: Insert sample data
+  shell: |
+    cat /tmp/dump.sql | mysql -u demo -pdemo demo
+
+- name: Install MySQL extension for PHP
+  apt:
+    name: php5
+       - mysql
+    state: present
+
+- name: Restart Apache
+  service:
+    name: apache2
+    state: restarted
